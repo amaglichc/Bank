@@ -20,7 +20,6 @@ class UserOrm(Base):
     role: Mapped[str] = mapped_column(nullable=False, server_default=RoleEnum.user, default=RoleEnum.user)
     wallets: Mapped[list["WalletOrm"]] = relationship(
         back_populates="owner",
-        lazy="selectin",
         cascade="save-update, merge"
     )
     created_at: Mapped[datetime] = mapped_column(server_default=text("TIMEZONE('utc',now())"))

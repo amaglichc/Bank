@@ -7,6 +7,7 @@ from Schemas.Auth.SignUpUser import SignUpUser
 from Schemas.Auth.Token import TokenInfo
 from Schemas.UserDTO import UserDTO
 
+
 router = APIRouter(
     tags=["Auth"],
     prefix="/auth"

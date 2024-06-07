@@ -18,8 +18,14 @@ def encode_jwt(payload: dict, expire_minutes: int, algorithm: str = "RS256",
     return jwt.encode(payload, key, algorithm)
 
 
+def decode_jwt(token: str,
+               public_key: str = public_key_path.read_text(),
+               algorithm: str = "RS256") -> dict:
+    return jwt.decode(token, public_key, algorithm)
+
+
 async def get_jwt(user: SignInUser):
     user_dto = await SignIn(user)
-    access = encode_jwt({"type": "access", "sub": user_dto.id, "role": user_dto.role}, expire_minutes=3)
+    access = encode_jwt({"type": "access", "sub": user_dto.id, "role": user_dto.role}, expire_minutes=180)
     refresh = encode_jwt({"type": "refresh", "sub": user_dto.id}, expire_minutes=60 * 24 * 30)
     return TokenInfo(access_token=access, refresh_token=refresh)

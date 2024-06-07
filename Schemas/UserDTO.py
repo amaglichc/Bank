@@ -19,4 +19,4 @@ class UserDTO(BaseModel):
     password: str
     role: RoleEnum
     created_at: datetime
-    wallets: list[WalletSchema]
+    wallets: list[WalletSchema] = []

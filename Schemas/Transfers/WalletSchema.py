@@ -15,11 +15,17 @@ class CurrencyEnum(str, Enum):
 
 class AddWalletSchema(BaseModel):
     name: str | None = None
-    owner_id: int
     currency: CurrencyEnum
+
+
+class DeleteWalletSchema(BaseModel):
+    wallet_to_delete_id: int
+    wallet_for_money: int | None
+
 
 
 class WalletSchema(AddWalletSchema):
     id: int
     amount: Decimal
     created_at: datetime
+    owner_id: int

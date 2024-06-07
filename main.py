@@ -12,8 +12,17 @@ app.include_router(AuthRouter)
 app.include_router(WalletRouter)
 
 
+@app.on_event("startup")
+async def startup():
+    print("startup")
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    print("shutdown")
+
+
 @app.middleware("http")
 async def add_time(request: Request, call_next):
     response = await call_next(request)
-    response.headers["sigma"] = "SIGMA"
     return response

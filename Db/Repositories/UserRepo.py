@@ -1,5 +1,7 @@
 from fastapi import HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import selectinload
 
 from Auth.Utils import generate_password, validate_password
 from Db.Orms.UserOrm import UserOrm
@@ -12,15 +14,21 @@ from Schemas.UserDTO import UserDTO
 async def create_user(user: SignUpUser) -> UserDTO:
     async with session_maker.begin() as session:
         user.password = generate_password(user.password).decode("utf-8")
-        user_orm: UserOrm = UserOrm(username=user.username, password=user.password, email=user.email)
+        user_orm: UserOrm = UserOrm(username=user.username, password=user.password, email=user.email, wallets=[])
         session.add(user_orm)
-        await session.commit()
-        return UserDTO.model_validate(user_orm, from_attributes=True)
+        try:
+            await session.commit()
+        except IntegrityError as e:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User with this email or username already exist")
+        dto = UserDTO.model_validate(user_orm, from_attributes=True)
+        return dto
 
 
 async def get_user_by_id(id: int) -> UserDTO:
     async with session_maker.begin() as session:
-        user: UserOrm = await session.get(UserOrm, id)
+        user: UserOrm = await session.execute(
+            select(UserOrm).options(selectinload(UserOrm.wallets)).where(UserOrm.id == id))
+        user = user.scalar()
         if user is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
         return UserDTO.model_validate(user, from_attributes=True)
@@ -28,13 +36,16 @@ async def get_user_by_id(id: int) -> UserDTO:
 
 async def get_user_by_email(email: str) -> UserDTO:
     async with session_maker.begin() as session:
-        user: UserOrm = await session.execute(select(UserOrm).where(UserOrm.email == email))
-        return UserDTO.model_validate(user.scalar(), from_attributes=True)
+        user: UserOrm = await session.execute(
+            select(UserOrm).options(selectinload(UserOrm.wallets)).where(UserOrm.email == email))
+        user = user.scalar()
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        return UserDTO.model_validate(user, from_attributes=True)
 
 
 async def SignIn(user: SignInUser):
-    async with session_maker.begin() as session:
-        userDto: UserDTO = await get_user_by_email(user.email)
-        if validate_password(user.password, userDto.password.encode("utf-8")):
-            return userDto
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid data")
+    userDto: UserDTO = await get_user_by_email(user.email)
+    if validate_password(user.password, userDto.password.encode("utf-8")):
+        return userDto
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid data")

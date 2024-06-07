@@ -18,7 +18,6 @@ class WalletOrm(Base):
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=False)
     owner: Mapped[UserOrm] = relationship(
         back_populates="wallets",
-        lazy="selectin",
         cascade="save-update,merge"
     )
     created_at: Mapped[datetime] = mapped_column(server_default=text("TIMEZONE('utc',now())"))
