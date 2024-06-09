@@ -6,10 +6,14 @@ from pydantic import BaseModel
 from Schemas.Transfers.WalletSchema import CurrencyEnum
 
 
-class TransferSchema(BaseModel):
-    id: int
-    from_user_id: int
+class AddTransferSchema(BaseModel):
+    to_wallet_id: int
     to_user_id: int
     amount: Decimal
+
+
+class TransferSchema(AddTransferSchema):
+    id: int
+    from_user_id: int
     currency: CurrencyEnum
     created_at: datetime

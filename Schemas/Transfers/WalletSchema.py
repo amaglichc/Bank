@@ -23,7 +23,6 @@ class DeleteWalletSchema(BaseModel):
     wallet_for_money: int | None
 
 
-
 class WalletSchema(AddWalletSchema):
     id: int
     amount: Decimal

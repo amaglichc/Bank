@@ -7,6 +7,7 @@ from sqlalchemy import pool
 from Config import db_config
 from Db.Orms.UserOrm import UserOrm  # noqa
 from Db.Orms.WalletOrm import WalletOrm  # noqa
+from Db.Orms.TransferOrm import TransferOrm  # noqa
 from Db.core import Base
 
 # this is the Alembic Config object, which provides

@@ -4,7 +4,8 @@ from typing import Annotated
 from fastapi import APIRouter, status, Depends
 
 from Auth.JWT.Security import get_token_payload, check_wallet_access
-from Db.Repositories import WalletRepo
+from Db.Repositories import WalletRepo, TransferRepo
+from Schemas.Transfers.TransferSchema import AddTransferSchema, TransferSchema
 from Schemas.Transfers.WalletSchema import WalletSchema, AddWalletSchema
 
 router = APIRouter(
@@ -35,3 +36,15 @@ async def delete_wallet(wallet_id: int, payload: Annotated[dict, Depends(get_tok
                         to_wallet_id: int | None = None):
     if await check_wallet_access(wallet_id, payload):
         return await WalletRepo.delete_wallet(wallet_id, to_wallet_id)
+
+
+# TRANSFERS LOGIC
+@router.get("/{user_id}")
+async def get_another_user_wallets(user_id: int) -> list[AddWalletSchema]:
+    return await WalletRepo.get_another_client_wallets(user_id)
+
+
+@router.post("/{wallet_id}/transfer", status_code=status.HTTP_200_OK)
+async def create_transfer(wallet_id: int, transfer: AddTransferSchema,
+                          payload: Annotated[dict, Depends(get_token_payload)]) -> TransferSchema:
+    return await TransferRepo.make_transfer(wallet_id, transfer, payload["sub"])

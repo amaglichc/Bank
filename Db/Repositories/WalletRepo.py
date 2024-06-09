@@ -60,3 +60,10 @@ async def delete_wallet(wallet_id: int, to_wallet_id: int | None) -> None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Select a wallet to transfer money")
         await session.execute(delete(WalletOrm).where(WalletOrm.id == wallet_to_delete.id))
         await session.commit()
+
+
+async def get_another_client_wallets(wallet_id) -> list[AddWalletSchema]:
+    async with session_maker.begin() as session:
+        wallets = await session.execute(
+            select(WalletOrm).options(selectinload(WalletOrm.owner)).where(WalletOrm.owner_id == wallet_id))
+        return [AddWalletSchema.model_validate(row, from_attributes=True) for row in wallets.scalars().all()]
