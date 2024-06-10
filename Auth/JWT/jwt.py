@@ -1,10 +1,12 @@
 from datetime import datetime, UTC, timedelta
 from pathlib import Path
 
+from fastapi import HTTPException, status
+
 import jwt
-from Db.Repositories.UserRepo import SignIn
-from Schemas.Auth.SignInUser import SignInUser
+from Db.Repositories import UserRepo
 from Schemas.Auth.Token import TokenInfo
+from Schemas.UserSchema import UserDTO
 
 cwd = Path.cwd()
 private_key_path: Path = cwd / 'keys' / 'jwt-private.pem'
@@ -24,8 +26,15 @@ def decode_jwt(token: str,
     return jwt.decode(token, public_key, algorithm)
 
 
-async def get_jwt(user: SignInUser):
-    user_dto = await SignIn(user)
+async def get_jwt(user_dto: UserDTO) -> TokenInfo:
     access = encode_jwt({"type": "access", "sub": user_dto.id, "role": user_dto.role}, expire_minutes=180)
     refresh = encode_jwt({"type": "refresh", "sub": user_dto.id}, expire_minutes=60 * 24 * 30)
     return TokenInfo(access_token=access, refresh_token=refresh)
+
+
+async def refresh_jwt(refresh_token: str) -> TokenInfo:
+    refresh: dict = decode_jwt(refresh_token)
+    if refresh["type"] != "refresh":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid type of token")
+    user_dto = await UserRepo.get_user_by_id(refresh["sub"])
+    return await get_jwt(user_dto)

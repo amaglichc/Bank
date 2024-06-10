@@ -12,8 +12,8 @@ from Schemas.Transfers.WalletSchema import CurrencyEnum
 class WalletOrm(Base):
     __tablename__ = "wallets"
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str | None] = mapped_column(String(50))
-    currency: Mapped[CurrencyEnum] = mapped_column(nullable=False)
+    name: Mapped[str | None] = mapped_column(String(50), default=None, server_default=None)
+    currency: Mapped[str] = mapped_column(nullable=False)
     amount: Mapped[Decimal] = mapped_column(default=Decimal(0))
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=False)
     owner: Mapped[UserOrm] = relationship(

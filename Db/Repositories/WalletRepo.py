@@ -28,6 +28,8 @@ async def get_wallet_by_id(wallet_id: int) -> WalletSchema:
         wallet: WalletOrm = await session.execute(
             select(WalletOrm).options(selectinload(WalletOrm.owner)).where(WalletOrm.id == wallet_id))
         wallet = wallet.scalar()
+        if wallet is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Wallet not found")
         return WalletSchema.model_validate(wallet, from_attributes=True)
 
 

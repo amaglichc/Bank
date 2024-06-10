@@ -4,8 +4,9 @@ from typing import TYPE_CHECKING
 from sqlalchemy import String, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from Db.Orms.TransferOrm import TransferOrm
 from Db.core import Base
-from Schemas.UserDTO import RoleEnum
+from Schemas.UserSchema import RoleEnum
 
 if TYPE_CHECKING:
     from Db.Orms.WalletOrm import WalletOrm

@@ -8,7 +8,7 @@ from Db.Orms.UserOrm import UserOrm
 from Db.core import session_maker
 from Schemas.Auth.SignInUser import SignInUser
 from Schemas.Auth.SignUpUser import SignUpUser
-from Schemas.UserDTO import UserDTO
+from Schemas.UserSchema import UserDTO
 
 
 async def create_user(user: SignUpUser) -> UserDTO:

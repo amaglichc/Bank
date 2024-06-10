@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 
 from Routers.AuthRouter import router as AuthRouter
+from Routers.TransferRouter import router as TransferRouter
 from Routers.WalletRouter import router as WalletRouter
 from Routers.mainRouter import router as mainRouter
 
@@ -10,6 +11,7 @@ app = FastAPI(
 app.include_router(mainRouter)
 app.include_router(AuthRouter)
 app.include_router(WalletRouter)
+app.include_router(TransferRouter)
 
 
 @app.on_event("startup")
